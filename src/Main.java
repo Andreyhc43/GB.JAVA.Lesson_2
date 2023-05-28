@@ -141,11 +141,44 @@ public class Main {
      * @param c
      * @return
      */
-    static boolean checkWin(char c){
+    public static boolean checkWin(char c){
+
+        for(int i = 0; i < fieldSizeX;i++){
+            for(int j = 0; j < fieldSizeY; j++){
+                if(field[i][j] != DOT_EMPTY){
+                    int count = 0;
+                    char currentSign = field[i][j];
+
+
+                    while (count == WIN_COUNT){
+
+                    }
+                }
+            }
+        }
 
 
         return false;
     }
+
+
+    private int checkInsideFieldWin(int i, int j, char sign, int count){
+
+
+        if(field[i][j+1] == sign | field[i][j-1] == sign){
+            count++;
+            checkInsideFieldWin(i,j+1,sign,count);
+
+        }
+        else {
+            count = 0;
+        }
+
+        return count;
+
+    }
+
+
 
     /**
      * Проверка на ничью
@@ -178,6 +211,13 @@ public class Main {
 
         return false; // Игра продолжается
     }
+
+
+
+
+
+
+
 
 
 
