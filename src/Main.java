@@ -28,10 +28,10 @@ public class Main {
                 printField();
                 if (gameCheck(DOT_HUMAN, "Вы победили!"))
                     break;
-//                aiTurn();
-//                printField();
-//                if (gameCheck(DOT_AI, "Компьютер победил!"))
-//                    break;
+                aiTurn();
+                printField();
+                if (gameCheck(DOT_AI, "Компьютер победил!"))
+                    break;
             }
             System.out.println("Желаете сыграть еще раз? (Y - да)");
             if (!SCANNER.next().equalsIgnoreCase("Y"))
@@ -139,20 +139,37 @@ public class Main {
     /**
      * Проверка победы
      *
-     * @param c
+     * @param playerSign
      * @return
      */
-    public static boolean checkWin(char c) {
+    public static boolean checkWin(char playerSign) {
 
         for (int i = 0; i < fieldSizeX; i++) {
             for (int j = 0; j < fieldSizeY; j++) {
-                if (field[i][j] != DOT_EMPTY) {
+                if (field[i][j] == playerSign) {
                     int count = 1;
-                    char currentSign = field[i][j];
 
-                    count = checkInsideFieldWin(i, j, currentSign, count);
-                    String result = (count == WIN_COUNT) ? "Победа" : "не хватает";
-                    System.out.println(result);
+                    int countHorRight = checkInsideFieldWinHorRight(i, j, playerSign, count);
+                    String resultHorizRight = (countHorRight == WIN_COUNT) ? "+++ Победа по горизонтали" : "по горизонтали(вправо) не хватает:"+ (WIN_COUNT-countHorRight);
+                    System.out.println(resultHorizRight);
+
+                    int countVertBottom = checkInsideFieldWinVertBottom(i, j, playerSign, count);
+                    String resultVertBottom = (countVertBottom == WIN_COUNT) ? "+++ Победа по вертикали" : "по вертикали(вниз) не хватает" + (WIN_COUNT - countVertBottom);
+                    System.out.println(resultVertBottom);
+
+                    int countDiagonalBottom = checkInsideFieldWinDiagonalBottom(i, j, playerSign, count);
+                    String resultDiagonalBottom = (countDiagonalBottom == WIN_COUNT) ? "+++ Победа по диагонали-вниз" : "по диагонали(вниз) не хватает" + (WIN_COUNT - countDiagonalBottom);
+                    System.out.println(resultDiagonalBottom);
+
+                    int countDiagonalTop = checkInsideFieldWinDiagonalTop(i, j, playerSign, count);
+                    String resultDiagonalTop = (countDiagonalTop == WIN_COUNT) ? "+++ Победа по диагонали-вверх\n" : "по диагонали(вверх) не хватает" + (WIN_COUNT - countDiagonalTop);
+                    System.out.println(resultDiagonalTop);
+
+                    count = Math.max(Math.max(countHorRight,countVertBottom), Math.max(countDiagonalBottom, countDiagonalTop));
+
+                    if(count >= WIN_COUNT){return true;}
+
+
 
                 }
             }
@@ -163,14 +180,80 @@ public class Main {
     }
 
 
-    public static int checkInsideFieldWin(int i, int j, char sign, int count) {
+    public static int checkInsideFieldWinHorRight(int i, int j, char sign, int count) {
 
         try {
             if (field[i][j + 1] == sign) {  // | field[i][j-1] == sign
                 count++;
-                int horizon = checkInsideFieldWin(i, j + 1, sign, count);
+                int horizon = checkInsideFieldWinHorRight(i, j + 1, sign, count);
 
                 count = horizon;
+                return count;
+            } else {
+//            count = 0; // НУЖЕН ЛИ??
+            }
+
+        } catch (RuntimeException e) {
+            e.getMessage();
+        }
+
+
+        return count;
+
+    }
+
+    public static int checkInsideFieldWinVertBottom(int i, int j, char sign, int count) {
+
+        try {
+            if (field[i + 1][j] == sign) {  // | field[i][j-1] == sign
+                count++;
+                int vertical = checkInsideFieldWinVertBottom(i + 1, j, sign, count);
+
+                count = vertical;
+                return count;
+            } else {
+//            count = 0; // НУЖЕН ЛИ??
+            }
+
+        } catch (RuntimeException e) {
+            e.getMessage();
+        }
+
+
+        return count;
+
+    }
+
+    public static int checkInsideFieldWinDiagonalBottom(int i, int j, char sign, int count) {
+
+        try {
+            if (field[i + 1][j + 1] == sign) {  // | field[i][j-1] == sign
+                count++;
+                int diagonal = checkInsideFieldWinDiagonalBottom(i + 1, j + 1, sign, count);
+
+                count = diagonal;
+                return count;
+            } else {
+//            count = 0; // НУЖЕН ЛИ??
+            }
+
+        } catch (RuntimeException e) {
+            e.getMessage();
+        }
+
+
+        return count;
+
+    }
+
+    public static int checkInsideFieldWinDiagonalTop(int i, int j, char sign, int count) {
+
+        try {
+            if (field[i - 1][j + 1] == sign) {  // | field[i][j-1] == sign
+                count++;
+                int diagonal = checkInsideFieldWinDiagonalTop(i - 1, j + 1, sign, count);
+
+                count = diagonal;
                 return count;
             } else {
 //            count = 0; // НУЖЕН ЛИ??
@@ -202,12 +285,12 @@ public class Main {
     /**
      * Метод проверки состояния игры
      *
-     * @param c
+     * @param playerSign - фишка игрока-пользователя
      * @param str
      * @return
      */
-    static boolean gameCheck(char c, String str) {
-        if (checkWin(c)) {
+    static boolean gameCheck(char playerSign, String str) {
+        if (checkWin(playerSign)) {
             System.out.println(str);
             return true;
         }
