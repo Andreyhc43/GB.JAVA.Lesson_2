@@ -22,15 +22,16 @@ public class Main {
         while (true){
             initialize();
             printField();
+
             while (true){
                 humanTurn();
                 printField();
                 if (gameCheck(DOT_HUMAN, "Вы победили!"))
                     break;
-                aiTurn();
-                printField();
-                if (gameCheck(DOT_AI, "Компьютер победил!"))
-                    break;
+//                aiTurn();
+//                printField();
+//                if (gameCheck(DOT_AI, "Компьютер победил!"))
+//                    break;
             }
             System.out.println("Желаете сыграть еще раз? (Y - да)");
             if (!SCANNER.next().equalsIgnoreCase("Y"))
@@ -149,10 +150,10 @@ public class Main {
                     int count = 0;
                     char currentSign = field[i][j];
 
+                    count = checkInsideFieldWin(i,j,currentSign,count);
+                    String result = (count > WIN_COUNT)  ? "Победа" : "не хватает";
+                    System.out.println(result);
 
-                    while (count == WIN_COUNT){
-
-                    }
                 }
             }
         }
@@ -162,13 +163,17 @@ public class Main {
     }
 
 
-    private int checkInsideFieldWin(int i, int j, char sign, int count){
+    public static int checkInsideFieldWin(int i, int j, char sign, int count){
 
 
-        if(field[i][j+1] == sign | field[i][j-1] == sign){
+        if(field[i][j+1] == sign ){  // | field[i][j-1] == sign
             count++;
-            checkInsideFieldWin(i,j+1,sign,count);
+            int horizon = checkInsideFieldWin(i,j+1,sign,count);
+            int vertical =  checkInsideFieldWin(i+1,j,sign,count);
 
+            // возврат максимального???
+            count +=  Math.max(horizon, vertical);
+            return count;
         }
         else {
             count = 0;
