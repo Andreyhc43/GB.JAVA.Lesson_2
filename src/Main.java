@@ -13,7 +13,13 @@ public class Main {
 
     private static final Scanner SCANNER = new Scanner(System.in);
 
-    private static int[] aiStep = new int[2];    // массив для хранения координат хода блокировки игроко компьютером
+    private static int[] aiStep = new int[2];    // массив для хранения координат хода блокировки игрока компьютером
+
+    private static String[] storageHorizonStepsAI;        // массив для хранения возможных ходов ИИ по горизонтали.
+    private static String[] storageVerticalStepsAI;        // массив для хранения возможных ходов ИИ по вертикали.
+    private static String[] storageDiagonalUpStepsAI;   // массив для хранения возможных ходов ИИ по диагонали слева на право.
+    private static String[] storageDiagonalDownStepsAI;   // массив для хранения возможных ходов ИИ по диагонали слева на право.
+
 
     private static final int ALARM_NUMBER = 2;   // количество оставшихся до победы незаполненных ячеек, при которых включится в работу ИИ.
     private static char[][] field;
@@ -30,6 +36,11 @@ public class Main {
     private static final String PATH_ANALISE = "d://testFolders//GeekBrains//GB.Lesson_2.ANALISE.txt";
     private static final String PATH_AI = "d://testFolders//GeekBrains//GB.Lesson_2.AI.txt";
 
+    /**
+     * Счетчик ходов
+     */
+    private static int countSteps;        // счетчик итераций цикла игры
+
 
     public static void main(String[] args) {
         while (true) {
@@ -37,6 +48,7 @@ public class Main {
             printField();
 
             while (true) {
+                countSteps++;
                 humanTurn();
                 printField();
                 if (gameCheck(DOT_HUMAN, "Вы победили!"))
@@ -58,11 +70,15 @@ public class Main {
      * Инициализация игрового поля
      */
     private static void initialize() {
+        countSteps = 0;
         aiStep[0] = fieldSizeX;         // инициализируем `проверяемый` элемент
 
         fieldSizeX = 5;
         fieldSizeY = 5;
-
+        storageHorizonStepsAI = new String[fieldSizeY * fieldSizeX];
+        storageVerticalStepsAI = new String[fieldSizeY * fieldSizeX];
+        storageDiagonalUpStepsAI = new String[fieldSizeY * fieldSizeX];
+        storageDiagonalDownStepsAI = new String[fieldSizeY * fieldSizeX];
 
         field = new char[fieldSizeX][fieldSizeY];
 
@@ -140,13 +156,13 @@ public class Main {
 
     /**
      * Ход компьютера
-     * Логика блокировки хода оппонента(пользователя) основана на анализе компьютером недостающих меток
+     * Логика блокировки хода пользователя основана на анализе компьютером недостающих меток
      * до полной выйгрышной комбинации пользователя.
      */
     private static void aiTurn() {
         int x, y;
         do {
-            if (aiStep[0] != fieldSizeX) {
+            if (aiStep[0] != fieldSizeX ) {
                 x = aiStep[0];
                 y = aiStep[1];
                 aiStep[0] = fieldSizeX; // возврат в 'режим ожидания'
@@ -172,36 +188,31 @@ public class Main {
                 if (field[i][j] == playerSign) {
                     int count = 1;
 
-
                     int countHorRight = checkInsideFieldWinHorRight(i, j, playerSign, count);
-                    String resultHorizRight = (countHorRight == WIN_COUNT) ? "+++ Победа по горизонтали" : "По горизонтали(вправо) не хватает до полной комбинации:" + (WIN_COUNT - countHorRight);
-                    System.out.println(resultHorizRight);
-
-                    String notionAI = playerSign + " field " + (i + 1) + " " + (j + 1 + (WIN_COUNT - ALARM_NUMBER));// ячейка, которую срочно нужно заполнить противоположной фишкой
-                    if (playerSign == DOT_HUMAN & countHorRight == WIN_COUNT - ALARM_NUMBER) {
-                        aiStep[0] = i;
-                        aiStep[1] = j + (WIN_COUNT - ALARM_NUMBER);
-                        writeToFile(notionAI, PATH_AI);
-                    }
+//                    String resultHorizRight = (countHorRight == WIN_COUNT) ? "+++ Победа по горизонтали" : "По горизонтали(вправо) не хватает до полной комбинации:" + (WIN_COUNT - countHorRight);
+//                    System.out.println(resultHorizRight);
+//                    String notionAI = playerSign + " field " + (i + 1) + " " + (j + 1 + (WIN_COUNT - ALARM_NUMBER));// ячейка, которую рекомендуется заполнить противоположной фишкой
 
 
                     int countVertBottom = checkInsideFieldWinVertBottom(i, j, playerSign, count);
-                    String resultVertBottom = (countVertBottom == WIN_COUNT) ? "+++ Победа по вертикали" : "По вертикали(вниз) не хватает до полной комбинации: " + (WIN_COUNT - countVertBottom);
-                    System.out.println(resultVertBottom);
+//                    String resultVertBottom = (countVertBottom == WIN_COUNT) ? "+++ Победа по вертикали" : "По вертикали(вниз) не хватает до полной комбинации: " + (WIN_COUNT - countVertBottom);
+//                    System.out.println(resultVertBottom);
 
                     int countDiagonalBottom = checkInsideFieldWinDiagonalBottom(i, j, playerSign, count);
-                    String resultDiagonalBottom = (countDiagonalBottom == WIN_COUNT) ? "+++ Победа по диагонали-вниз" : "По диагонали(вниз) не хватает до полной комбинации: " + (WIN_COUNT - countDiagonalBottom);
-                    System.out.println(resultDiagonalBottom);
+//                    String resultDiagonalBottom = (countDiagonalBottom == WIN_COUNT) ? "+++ Победа по диагонали-вниз" : "По диагонали(вниз) не хватает до полной комбинации: " + (WIN_COUNT - countDiagonalBottom);
+//                    System.out.println(resultDiagonalBottom);
 
                     int countDiagonalTop = checkInsideFieldWinDiagonalTop(i, j, playerSign, count);
-                    String resultDiagonalTop = (countDiagonalTop == WIN_COUNT) ? "+++ Победа по диагонали-вверх\n" : "По диагонали(вверх) не хватает до полной комбинации: " + (WIN_COUNT - countDiagonalTop);
-                    System.out.println(resultDiagonalTop);
+//                    String resultDiagonalTop = (countDiagonalTop == WIN_COUNT) ? "+++ Победа по диагонали-вверх\n" : "По диагонали(вверх) не хватает до полной комбинации: " + (WIN_COUNT - countDiagonalTop);
+//                    System.out.println(resultDiagonalTop);
+
+                    analyzeAI(playerSign,countHorRight, countVertBottom,countDiagonalTop,i,j);
 
                     count = Math.max(Math.max(countHorRight, countVertBottom), Math.max(countDiagonalBottom, countDiagonalTop));
 
                     if (count >= WIN_COUNT) {
                         return true;
-                    } // ==
+                    }
 
 
                 }
@@ -223,8 +234,8 @@ public class Main {
      * @return - возврат счётчика.
      */
     public static int checkInsideFieldWinHorRight(int i, int j, char sign, int count) {
-        String notionAI = sign + "field " + (i + 1) + " " + (j + 1);
-        writeToFile(notionAI, PATH_STEPS);
+//        String notionAI = sign + "field " + (i + 1) + " " + (j + 1);
+//        writeToFile(notionAI, PATH_STEPS);
 
         try {
             if (field[i][j + 1] == sign) {
@@ -240,8 +251,8 @@ public class Main {
             } else {
 //            count = 0; // НУЖЕН ЛИ??
                 // запись возможного варианта для блокировки хода в файл
-                notionAI = sign + "field " + (i + 1) + " " + (j + 1);
-                writeToFile(notionAI, PATH_ANALISE);
+//                notionAI = sign + "field " + (i + 1) + " " + (j + 1);
+//                writeToFile(notionAI, PATH_ANALISE);
             }
 
         } catch (RuntimeException e) {
@@ -327,7 +338,6 @@ public class Main {
                 count = diagonal;
                 return count;
             } else {
-//            count = 0; // НУЖЕН ЛИ??
             }
 
         } catch (RuntimeException e) {
@@ -373,34 +383,114 @@ public class Main {
         return false; // Игра продолжается
     }
 
-    static void analize() {
-    }
+    static void analyzeAI(char playerSign, int countHorRight, int countVertBottom, int countDiagonalTop, int i, int j) {
+        if (playerSign == DOT_HUMAN & countHorRight >= WIN_COUNT - ALARM_NUMBER) {  // |
+            if(checkAddToArray(storageHorizonStepsAI, i,j )){
 
-    /**
-     * Вспомогательный метод. Для записи результата анализа ходов ИИ в файл.
-     *
-     * @param answer - записываемый результат
-     */
-    public static void writeToFile(String answer, String path) {
+                if(j + (WIN_COUNT - ALARM_NUMBER) < fieldSizeX ){ // & field[i][j + (WIN_COUNT - ALARM_NUMBER )] == DOT_EMPTY
+                    aiStep[0] = i;
+                    aiStep[1] = j + (WIN_COUNT - ALARM_NUMBER);
+                    System.out.println("Рекомендуемый ход для блокировки(по горизонтали):" + (aiStep[0]+1) + (aiStep[1]+1));
 
-        File file = new File(path);
-        String txt = "\nРезультат\n";
+                }else if (j - (WIN_COUNT - ALARM_NUMBER) < fieldSizeX ) { // & field[i][j - (WIN_COUNT - ALARM_NUMBER - 1)] == DOT_EMPTY
+                    aiStep[0] = i;
+                    aiStep[1] = j - (WIN_COUNT - ALARM_NUMBER - 1);
+                    System.out.println("Рекомендуемый ход для блокировки(по горизонтали):" + (aiStep[0]+1) + (aiStep[1]+1));
+                }
 
+                else {
+                    aiStep[0] = fieldSizeX;
+                }
 
-        try (FileOutputStream out = new FileOutputStream(file, true)) {
-            try {
-                out.write(txt.getBytes());
-                out.write(answer.getBytes());
-                out.close();
-            } catch (Exception e) {
-                System.out.print(e.getMessage());
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+
+
+
+        } else if (playerSign == DOT_HUMAN & countVertBottom >= WIN_COUNT - ALARM_NUMBER) {  // |
+            if (checkAddToArray(storageVerticalStepsAI, i, j)) {
+
+                if (i + (WIN_COUNT - ALARM_NUMBER) < fieldSizeY) { // & field[i][j + (WIN_COUNT - ALARM_NUMBER )] == DOT_EMPTY
+                    aiStep[0] = i + (WIN_COUNT - ALARM_NUMBER);
+                    aiStep[1] = j;
+                    System.out.println("Рекомендуемый ход для блокировки(по вертикали):" + (aiStep[0] + 1) + (aiStep[1] + 1));
+
+                } else if (i - (WIN_COUNT - ALARM_NUMBER) < fieldSizeX) { // & field[i][j - (WIN_COUNT - ALARM_NUMBER - 1)] == DOT_EMPTY
+                    aiStep[0] = i - (WIN_COUNT - ALARM_NUMBER + 1);
+                    aiStep[1] = j;
+                    System.out.println("Рекомендуемый ход для блокировки(по вертикали):" + (aiStep[0] + 1) + (aiStep[1] + 1));
+                } else {
+                    aiStep[0] = fieldSizeX;
+                }
+
+
+            }
+
+
+        }
+        else if (playerSign == DOT_HUMAN & countDiagonalTop >= WIN_COUNT - ALARM_NUMBER) {  // |
+            if(checkAddToArray(storageDiagonalUpStepsAI, i,j )){
+
+                if(i - (WIN_COUNT - ALARM_NUMBER) >= 0 & j + (WIN_COUNT - ALARM_NUMBER) < fieldSizeY ) { // & field[i][j + (WIN_COUNT - ALARM_NUMBER )] == DOT_EMPTY
+                    aiStep[0] = i - (WIN_COUNT - ALARM_NUMBER);
+                    aiStep[1] = j + (WIN_COUNT - ALARM_NUMBER);
+                    System.out.println("Рекомендуемый ход для блокировки(по диагонали слева на право):" + (aiStep[0] + 1) + (aiStep[1] + 1));
+                } else if (i + (WIN_COUNT - ALARM_NUMBER) >= 0 & (j - (WIN_COUNT - ALARM_NUMBER -1) < fieldSizeX) & j - (WIN_COUNT - ALARM_NUMBER -1) >0){
+                    aiStep[0] = i + (WIN_COUNT - ALARM_NUMBER + 1);
+                    aiStep[1] = j - (WIN_COUNT - ALARM_NUMBER - 1);
+                    System.out.println("Рекомендуемый ход для блокировки(по диагонали слева на право):" + (aiStep[0] + 1) + (aiStep[1] + 1));
+                }
+
+
+
+
+            }
+        }
+        else if (playerSign == DOT_HUMAN & countVertBottom >= WIN_COUNT - ALARM_NUMBER) {  // |
+            if(checkAddToArray(storageDiagonalDownStepsAI, i,j )){
+
+                if(i + (WIN_COUNT - ALARM_NUMBER) <= fieldSizeY & j + (WIN_COUNT - ALARM_NUMBER) < fieldSizeX ) { // & field[i][j + (WIN_COUNT - ALARM_NUMBER )] == DOT_EMPTY
+                    aiStep[0] = i + (WIN_COUNT - ALARM_NUMBER);
+                    aiStep[1] = j + (WIN_COUNT - ALARM_NUMBER);
+                    System.out.println("Рекомендуемый ход для блокировки(по диагонали слева на право вниз):" + (aiStep[0] + 1) + (aiStep[1] + 1));
+                } else if (i - (WIN_COUNT - ALARM_NUMBER - 1) >= 0 & (j - (WIN_COUNT - ALARM_NUMBER -1) > 0) & j - (WIN_COUNT - ALARM_NUMBER -1) >0){
+                    aiStep[0] = i - (WIN_COUNT - ALARM_NUMBER - 1);
+                    aiStep[1] = j - (WIN_COUNT - ALARM_NUMBER - 1);
+                    System.out.println("Рекомендуемый ход для блокировки(по диагонали слева на право вверх):" + (aiStep[0] + 1) + (aiStep[1] + 1));
+                }
+            }
         }
 
 
     }
+
+
+
+    /**
+     * Метод проверки на наличие элемента и добавления в массив
+    */
+    public static boolean checkAddToArray(String[] arr, Integer firstNum, Integer secondNum){
+        String text = firstNum.toString()+ secondNum.toString();
+
+        for(int i = 0; i < arr.length;i++){
+            if(arr[i] == text ){
+//                System.out.println("Метод checkAddToArray отработал корректно. False");
+                return false;
+            }
+        }
+
+        for (int i = 0; i< arr.length;i++){
+            if(arr[i] == null){
+                arr[i] = text;
+            }
+        }
+
+//        System.out.println("Метод checkAddToArray отработал корректно. True");
+        return true;
+    }
+
+
+
+
 
 
 }
